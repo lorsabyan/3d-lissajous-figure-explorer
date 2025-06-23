@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Lissajous Figure Explorer with Projections</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" xintegrity="sha384-n8MVd4RsNIU0KOVEMVIARBECHSOfKSN4Bmd6r/fqO8G4A6zvEz7E<div>" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" xintegrity="sha384-XjKyOOlVwcBPldrCtA/5/GPhPoTaBLCNSJdaSdAWdP2AOScElyYyLVuDRZAASSJa" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Source Serif 4', serif;
+            margin: 0;
+            overflow: hidden;
+            background-color: #111827; /* bg-gray-900 */
+            color: #f3f4f6; /* text-gray-200 */
+        }
+        #webgl {
+            position: fixed;
+            top: 0;
+            left: 0;
+            outline: none;
+        }
+        #controls, #info-panel {
+            position: fixed;
+            top: 20px;
+            background-color: #1f2937; /* bg-gray-800 */
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #4b5563; /* border-gray-600 */
+            width: 360px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: transform 0.4s ease-in-out;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        #controls {
+            left: 20px;
+            z-index: 20;
+        }
+         #info-panel {
+            right: 20px;
+            z-index: 19;
+            transform: translateX(110%);
+        }
+        #info-panel.visible {
+            transform: translateX(0);
+        }
+        #controls.collapsed {
+            transform: translateX(-110%);
+        }
+        /* Custom Scrollbar */
+        #controls::-webkit-scrollbar, #info-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        #controls::-webkit-scrollbar-track, #info-panel::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        #controls::-webkit-scrollbar-thumb, #info-panel::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 4px;
+            border: 2px solid #1f2937;
+        }
+        #expand-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(31, 41, 55, 0.85);
+            padding: 8px;
+            border-radius: 50%;
+            z-index: 10;
+            cursor: pointer;
+            transition: opacity 0.4s ease-in-out;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .header-icons button {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .header-icons button:hover {
+            color: #fff;
+        }
+        .control-group { margin-bottom: 1rem; }
+        .control-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; text-align: center; }
+        .divider { height: 1px; background-color: #4b5563; margin: 1.5rem 0; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 1rem;}
+        .btn {
+            padding: 8px; border-radius: 6px; background-color: #374151; border: 1px solid #4b5563;
+            color: #f3f4f6; cursor: pointer; transition: background-color 0.2s; text-align: center;
+        }
+        .btn:hover { background-color: #4b5563; }
+        .knobs-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+        .knob-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .knob {
+            cursor: pointer;
+            user-select: none;
+        }
+        /* Custom Toggle Switch */
+        .toggle-switch-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .toggle-switch .toggle-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #374151;
+            transition: .4s;
+            border-radius: 28px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        .toggle-input:checked + .toggle-slider {
+            background-color: #22c55e;
+        }
+        .toggle-input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Custom Slider Styles */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+            width: 100%;
+            margin: 8px 0;
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #374151;
+            border-radius: 2px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #4ade80; /* green-400 */
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 5px #4ade80;
+        }
+         input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #374151;
+            border-radius: 2px;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #4ade80;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 5px #4ade80;
+        }
+        #color-picker-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        .projection-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .projection-view {
+            width: 180px;
+            height: 180px;
+            border: 1px solid #2e443c;
+            border-radius: 8px;
+            background-color: rgba(10, 20, 15, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+        .projection-view canvas { display: block; width: 100%; height: 100%; }
+        .projection-label {
+            position: absolute; top: 5px; left: 5px; color: #a3f2a3; font-family: 'Roboto Mono', monospace;
+            font-size: 14px; background: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 3px;
+        }
+        .katex-display {
+            margin: 0.5em 0;
+            text-align: left;
+        }
+        .katex {
+            font-size: 1.1em !important;
+        }
+        #info-panel p {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+        #info-panel h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            border-bottom: 1px solid #4b5563;
+            padding-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <button id="expand-btn" class="hidden">
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+    <div id="controls">
+        <div class="panel-header">
+            <h1 class="text-xl font-bold">Lissajous Explorer</h1>
+            <div class="header-icons">
+                 <button id="info-btn" title="Information">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                 </button>
+                 <button id="collapse-btn" title="Collapse Panel">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+            </div>
+        </div>
+        
+        <h2 class="text-lg font-semibold mb-2 mt-4 text-center">Curve Parameters</h2>
+        <div class="control-group">
+            <label class="mb-2">Frequencies (a, b, c)</label>
+            <div id="frequency-knobs" class="knobs-container"></div>
+        </div>
+         <div class="control-group">
+            <label class="mb-2">Amplitudes (A, B, C)</label>
+            <div id="amplitude-knobs" class="knobs-container"></div>
+        </div>
+        <div class="control-group">
+             <label class="mb-2">Phase Shifts (δ)</label>
+             <div class="knobs-container">
+                <div id="knob-deltaX-container" class="knob-wrapper"></div>
+                <div id="knob-deltaY-container" class="knob-wrapper"></div>
+                <div id="knob-deltaZ-container" class="knob-wrapper"></div>
+             </div>
+        </div>
+        <div class="control-group">
+            <label for="damping">Damping (λ)</label>
+            <input id="damping" type="range" min="0" max="0.5" value="0.0" step="0.001">
+        </div>
+        
+        <div class="divider"></div>
+        <h2 class="text-lg font-semibold mb-2 text-center">Visuals</h2>
+        <div class="control-group">
+            <label>Color</label>
+            <div id="color-picker-wrapper">
+                <div id="color-picker"></div>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="lineThickness">Line Thickness</label>
+            <input id="lineThickness" type="range" min="0.01" max="0.05" value="0.015" step="0.001">
+        </div>
+         <div class="control-group">
+            <label for="gridThickness">Grid Thickness</label>
+            <input id="gridThickness" type="range" min="0.001" max="0.02" value="0.010" step="0.001">
+        </div>
+         <div class="control-group">
+            <label for="gridBrightness">Grid Brightness</label>
+            <input id="gridBrightness" type="range" min="0" max="2.5" value="1.7" step="0.01">
+        </div>
+        <div class="control-group">
+            <label for="glow">Glow Intensity</label>
+            <input id="glow" type="range" min="0" max="3" value="0.5" step="0.01">
+        </div>
+        <div class="toggle-switch-group">
+             <label for="toggle-aa">Anti-Aliasing</label>
+             <label class="toggle-switch">
+                <input type="checkbox" id="toggle-aa" class="toggle-input" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-switch-group">
+             <label for="toggle-phase">Animate Phase Shift</label>
+             <label class="toggle-switch">
+                <input type="checkbox" id="toggle-phase" class="toggle-input">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+         <div class="toggle-switch-group">
+             <label for="toggle-audio">Enable Audio</label>
+             <label class="toggle-switch">
+                <input type="checkbox" id="toggle-audio" class="toggle-input">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        
+        <div class="divider"></div>
+        <h2 class="text-lg font-semibold mb-2 text-center">Camera</h2>
+        <div class="btn-group">
+            <button class="btn" id="preset-persp">Perspective</button>
+            <button class="btn" id="preset-top">Top (XY)</button>
+            <button class="btn" id="preset-front">Front (XZ)</button>
+            <button class="btn" id="preset-side">Side (YZ)</button>
+        </div>
+        <button class="btn" id="toggle-rotate" style="width:100%; margin-top: 8px;">Toggle Auto-Rotate</button>
+    </div>
+
+    <div id="info-panel">
+        <div class="panel-header">
+            <h1 class="text-xl font-bold">Information</h1>
+            <button id="info-close-btn" title="Close">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <p>This explorer simulates 3D Lissajous curves based on the following parametric equations for damped harmonic motion:</p>
+        <div id="equations"></div>
+        
+        <h3>Parameters</h3>
+        <p><b>Frequencies (a, b, c):</b> The integer ratios between the oscillation frequencies on each axis. These determine the fundamental shape and number of "lobes" of the figure.</p>
+        <p><b>Amplitudes (A, B, C):</b> The maximum displacement of the curve along each respective axis.</p>
+        <p><b>Phase Shifts (δ):</b> The initial angle (in radians) of each oscillation. This effectively "rotates" the figure in 3D space by changing its starting point.</p>
+        <p><b>Damping (λ):</b> Controls the rate of exponential decay of the amplitude, causing the figure to spiral inwards over time. A value of 0 results in an undamped, stable figure.</p>
+    </div>
+
+    <canvas id="webgl"></canvas>
+    <div class="projection-container">
+        <div id="view-xy" class="projection-view">
+            <canvas id="canvas-xy"></canvas>
+            <div class="projection-label">XY</div>
+        </div>
+        <div id="view-xz" class="projection-view">
+            <canvas id="canvas-xz"></canvas>
+            <div class="projection-label">XZ</div>
+        </div>
+        <div id="view-yz" class="projection-view">
+             <canvas id="canvas-yz"></canvas>
+            <div class="projection-label">YZ</div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+
+        // --- Custom UI Controls ---
+        class BaseKnob extends EventTarget {
+            constructor(container, label, options) {
+                super();
+                this.container = container;
+                this.options = options;
+                this.isDragging = false;
+                this.value = options.initial;
+                this.angle = this.valueToAngle(this.value);
+                this.createDOM(label, options.isSwitch);
+                this.addEventListeners();
+                this.updateVisuals();
+            }
+            createDOM(label, isSwitch = false) {
+                const size = 80;
+                const svgNS = "http://www.w3.org/2000/svg";
+                const svg = document.createElementNS(svgNS, "svg");
+                svg.setAttribute("class", "knob");
+                svg.setAttribute("width", size);
+                svg.setAttribute("height", size);
+                svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+
+                const background = document.createElementNS(svgNS, "circle");
+                background.setAttribute("cx", size / 2);
+                background.setAttribute("cy", size / 2);
+                background.setAttribute("r", size / 2 * 0.9);
+                background.setAttribute("fill", "#1f2937");
+                background.setAttribute("stroke", "#4b5563");
+                background.setAttribute("stroke-width", "2");
+                svg.appendChild(background);
+
+                const indicator = document.createElementNS(svgNS, "circle");
+                indicator.setAttribute("r", 4);
+                indicator.setAttribute("fill", "#4ade80");
+                this.indicator = indicator;
+                svg.appendChild(indicator);
+                
+                const text = document.createElementNS(svgNS, "text");
+                text.setAttribute("x", "50%");
+                text.setAttribute("y", "50%");
+                text.setAttribute("dy", "0.3em");
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("font-family", "Roboto Mono, monospace");
+                text.setAttribute("font-size", isSwitch ? "24" : "14");
+                text.setAttribute("font-weight", "bold");
+                text.setAttribute("fill", "#f3f4f6");
+                this.text = text;
+                svg.appendChild(text);
+                
+                const labelText = document.createElement("div");
+                labelText.textContent = label;
+                labelText.className = "text-sm mt-1";
+
+                this.container.appendChild(svg);
+                this.container.appendChild(labelText);
+            }
+
+             addEventListeners() {
+                this.container.addEventListener("mousedown", (e) => this.startDrag(e));
+                window.addEventListener("mousemove", (e) => this.drag(e));
+                window.addEventListener("mouseup", (e) => this.endDrag(e));
+                this.container.addEventListener("touchstart", (e) => this.startDrag(e), { passive: false });
+                window.addEventListener("touchmove", (e) => this.drag(e), { passive: false });
+                window.addEventListener("touchend", (e) => this.endDrag(e));
+            }
+
+            startDrag(e) { e.preventDefault(); this.isDragging = true; this.container.style.cursor = 'grabbing'; }
+            endDrag() { this.isDragging = false; this.container.style.cursor = 'pointer'; }
+
+            setValue(newValue) {
+                if (this.isDragging) return;
+                this.value = Math.max(this.options.min, Math.min(this.options.max, newValue));
+                this.angle = this.valueToAngle(this.value);
+                this.updateVisuals();
+            }
+
+            updateVisuals() {
+                const size = 80;
+                const radius = size/2 * 0.7;
+                this.indicator.setAttribute("cx", size / 2 + radius * Math.sin(this.angle));
+                this.indicator.setAttribute("cy", size / 2 - radius * Math.cos(this.angle));
+                if(this.text) {
+                    this.text.textContent = this.value.toFixed(this.options.precision || 0);
+                }
+            }
+        }
+
+        class RotarySwitch extends BaseKnob {
+            constructor(container, label, options) {
+                super(container, label, {...options, isSwitch: true, precision: 0});
+            }
+            drag(e) {
+                if (!this.isDragging) return;
+                e.preventDefault();
+                const rect = this.container.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                const currentAngle = (Math.atan2(clientY - centerY, clientX - centerX) + Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI);
+                const numSteps = this.options.max - this.options.min + 1;
+                const stepAngle = (2 * Math.PI) / numSteps;
+                let valueIndex = Math.round(currentAngle / stepAngle);
+                valueIndex = valueIndex % numSteps;
+                const newValue = this.options.min + valueIndex;
+                if (newValue !== this.value) {
+                    this.value = newValue;
+                    this.angle = this.valueToAngle(this.value);
+                    this.updateVisuals();
+                    this.dispatchEvent(new CustomEvent('change', { detail: { value: this.value } }));
+                }
+            }
+            valueToAngle(value) {
+                const numSteps = this.options.max - this.options.min + 1;
+                const stepAngle = (2 * Math.PI) / numSteps;
+                return (value - this.options.min) * stepAngle;
+            }
+        }
+
+        class Knob extends BaseKnob {
+             constructor(container, label, options) {
+                super(container, label, {...options, isSwitch: false});
+            }
+            drag(e) {
+                if (!this.isDragging) return;
+                e.preventDefault();
+                const rect = this.container.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const clientX = e.clientX || e.touches[0].clientX;
+                const clientY = e.clientY || e.touches[0].clientY;
+                const dx = clientX - centerX;
+                const dy = clientY - centerY;
+                this.angle = (Math.atan2(dy, dx) + Math.PI / 2 + 2 * Math.PI)%(2*Math.PI);
+                this.value = this.angleToValue(this.angle);
+                this.updateVisuals();
+                this.dispatchEvent(new CustomEvent('change', { detail: { value: this.value } }));
+            }
+            updateVisuals() {
+                super.updateVisuals();
+                if(this.options.isPhase) {
+                    this.text.textContent = `${this.value.toFixed(2)}π`;
+                }
+            }
+            angleToValue(angle) {
+                return (angle / (2 * Math.PI)) * (this.options.max - this.options.min) + this.options.min;
+            }
+            valueToAngle(value) { return ((value - this.options.min) / (this.options.max - this.options.min)) * 2 * Math.PI; }
+        }
+
+        // --- Scenes & Parameters ---
+        const mainScene = new THREE.Scene();
+        const sceneXY = new THREE.Scene();
+        const sceneXZ = new THREE.Scene();
+        const sceneYZ = new THREE.Scene();
+        const scenes = { xy: sceneXY, xz: sceneXZ, yz: sceneYZ };
+        const params = {
+            a: 1, b: 2, c: 3, A: 1, B: 1, C: 1, 
+            deltaX: Math.PI / 2, deltaY: 0, deltaZ: 0,
+            damping: 0.0,
+            lineThickness: 0.015, gridThickness: 0.010, gridBrightness: 1.7,
+            color: { h: 120, s: 1, l: 0.5 }, glow: 0.5, aa: true, isPhaseAnimating: false,
+            isAudioEnabled: false
+        };
+        const tempColor = new THREE.Color();
+
+        // --- Web Audio API Setup ---
+        let audioContext;
+        let masterGain;
+        const oscillators = {};
+
+        function initAudio() {
+            if (audioContext) return;
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            masterGain = audioContext.createGain();
+            masterGain.gain.value = 0; // Muted by default
+            masterGain.connect(audioContext.destination);
+
+            ['a', 'b', 'c'].forEach(key => {
+                const osc = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                osc.type = 'sine';
+                osc.connect(gainNode);
+                gainNode.connect(masterGain);
+                osc.start();
+                oscillators[key] = { osc, gainNode };
+            });
+            updateAudioParams();
+        }
+
+        function updateAudioParams() {
+            if (!audioContext) return;
+            const baseFreq = 110; // A2
+            const now = audioContext.currentTime;
+            
+            oscillators.a.osc.frequency.linearRampToValueAtTime(baseFreq * params.a, now + 0.05);
+            oscillators.b.osc.frequency.linearRampToValueAtTime(baseFreq * params.b, now + 0.05);
+            if (params.c > 0) {
+                 oscillators.c.osc.frequency.linearRampToValueAtTime(baseFreq * params.c, now + 0.05);
+            }
+
+            oscillators.a.gainNode.gain.linearRampToValueAtTime(params.A * 0.1, now + 0.05);
+            oscillators.b.gainNode.gain.linearRampToValueAtTime(params.B * 0.1, now + 0.05);
+            oscillators.c.gainNode.gain.linearRampToValueAtTime(params.c > 0 ? params.C * 0.1 : 0, now + 0.05);
+        }
+
+        // --- Renderers & Post-processing ---
+        const mainRenderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#webgl'), antialias: false });
+        mainRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        mainRenderer.setSize(window.innerWidth, window.innerHeight);
+
+        const projectionRenderers = {
+            xy: new THREE.WebGLRenderer({ canvas: document.querySelector('#canvas-xy'), antialias: true }),
+            xz: new THREE.WebGLRenderer({ canvas: document.querySelector('#canvas-xz'), antialias: true }),
+            yz: new THREE.WebGLRenderer({ canvas: document.querySelector('#canvas-yz'), antialias: true }),
+        };
+        Object.values(projectionRenderers).forEach(r => r.setPixelRatio(window.devicePixelRatio));
+        
+        const mainCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        mainCamera.position.set(2, 3, 5);
+        
+        const projectionCameras = {
+            xy: new THREE.OrthographicCamera(-2.2, 2.2, 2.2, -2.2, 0.1, 1000),
+            xz: new THREE.OrthographicCamera(-2.2, 2.2, 2.2, -2.2, 0.1, 1000),
+            yz: new THREE.OrthographicCamera(-2.2, 2.2, 2.2, -2.2, 0.1, 1000),
+        };
+        projectionCameras.xy.position.set(0, 0, 10);
+        projectionCameras.xz.position.set(0, 10, 0);
+        projectionCameras.xz.lookAt(0, 0, 0);
+        projectionCameras.yz.position.set(10, 0, 0);
+        projectionCameras.yz.lookAt(0, 0, 0);
+        
+        const composer = new EffectComposer(mainRenderer);
+        const renderPass = new RenderPass(mainScene, mainCamera);
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), Math.cbrt(params.glow), 0.3, 0.0);
+        const smaaPass = new SMAAPass( window.innerWidth * mainRenderer.getPixelRatio(), window.innerHeight * mainRenderer.getPixelRatio() );
+        composer.addPass(renderPass);
+        composer.addPass(bloomPass);
+        composer.addPass(smaaPass);
+
+        const controls = new OrbitControls(mainCamera, mainRenderer.domElement);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
+        
+        // --- Oscilloscope Theme Setup ---
+        let gridGroup = new THREE.Group();
+        const gridMaterial = new THREE.MeshStandardMaterial({
+            color: '#000000', emissive: new THREE.Color(0x1a4d1a), emissiveIntensity: params.gridBrightness
+        });
+        mainScene.add(gridGroup);
+        
+        function createAxisLabel(text, color, position) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            const size = 128;
+            canvas.width = size;
+            canvas.height = size;
+            context.font = `bold ${size * 0.8}px 'Roboto Mono', monospace`;
+            context.fillStyle = color;
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(text, size / 2, size / 2);
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({ map: texture, transparent: true, sizeAttenuation: false });
+            const sprite = new THREE.Sprite(material);
+            sprite.position.copy(position);
+            sprite.scale.set(0.1, 0.1, 1);
+            return sprite;
+        }
+
+        function createGlowingGridPlane(size, divisions, material, thickness) {
+            const group = new THREE.Group();
+            const step = size / divisions;
+            const halfSize = size / 2;
+            for (let i = 0; i <= divisions; i++) {
+                const pos = -halfSize + i * step;
+                const vPath = new THREE.LineCurve3(new THREE.Vector3(pos, -halfSize, 0), new THREE.Vector3(pos, halfSize, 0));
+                group.add(new THREE.Mesh(new THREE.TubeGeometry(vPath, 1, thickness, 4), material));
+                const hPath = new THREE.LineCurve3(new THREE.Vector3(-halfSize, pos, 0), new THREE.Vector3(halfSize, pos, 0));
+                group.add(new THREE.Mesh(new THREE.TubeGeometry(hPath, 1, thickness, 4), material));
+            }
+            return group;
+        }
+
+        function updateGrid() {
+            while(gridGroup.children.length > 0) {
+                const plane = gridGroup.children[0];
+                gridGroup.remove(plane);
+                plane.children.forEach(line => line.geometry.dispose());
+            }
+            gridGroup.children = [];
+            const gridXY = createGlowingGridPlane(4, 8, gridMaterial, params.gridThickness);
+            const gridXZ = createGlowingGridPlane(4, 8, gridMaterial, params.gridThickness);
+            gridXZ.rotation.x = Math.PI / 2;
+            const gridYZ = createGlowingGridPlane(4, 8, gridMaterial, params.gridThickness);
+            gridYZ.rotation.y = Math.PI / 2; // Corrected rotation
+            gridGroup.add(gridXY, gridXZ, gridYZ);
+        }
+
+        mainScene.background = new THREE.Color('#0a0a0a');
+        mainScene.add(
+            createAxisLabel('X', '#ff7b7b', new THREE.Vector3(2.5, 0, 0)),
+            createAxisLabel('Y', '#7bff7b', new THREE.Vector3(0, 2.5, 0)),
+            createAxisLabel('Z', '#7b7bff', new THREE.Vector3(0, 0, 2.5))
+        );
+
+        const projGridColor = new THREE.Color(0x227722);
+        for (const key in scenes) {
+            scenes[key].background = new THREE.Color('#0a0a0a');
+            const grid = new THREE.GridHelper(4, 8, projGridColor, projGridColor);
+            if (key === 'xy') grid.rotation.x = Math.PI / 2;
+            else if (key === 'yz') grid.rotation.z = Math.PI / 2; // Corrected rotation
+            scenes[key].add(grid);
+        }
+
+        // --- Curve Object ---
+        let mainCurve, projectionLines = {};
+        let mainMaterial, projectionMaterial;
+        const curvePoints = 2000;
+
+        function updateCurve() {
+            if (mainCurve) mainScene.remove(mainCurve);
+            if (mainMaterial) mainMaterial.dispose();
+            if (projectionMaterial) projectionMaterial.dispose();
+            for(const key in projectionLines) scenes[key].remove(projectionLines[key]);
+            
+            tempColor.setHSL(params.color.h / 360, params.color.s, params.color.l);
+
+            mainMaterial = new THREE.MeshStandardMaterial({
+                color: '#000000', emissive: tempColor, emissiveIntensity: 1.5 
+            });
+            projectionMaterial = new THREE.LineBasicMaterial({ color: tempColor });
+            
+            const path = new THREE.Curve();
+            path.getPoint = t => {
+                const time = t * 20 * Math.PI;
+                const decay = Math.exp(-params.damping * t * 5);
+                const x = params.A * decay * Math.sin(params.a * time / 10 + params.deltaX);
+                const y = params.B * decay * Math.sin(params.b * time / 10 + params.deltaY);
+                const z = params.c === 0 ? 0 : params.C * decay * Math.sin(params.c * time / 10 + params.deltaZ);
+                return new THREE.Vector3(x, y, z);
+            };
+            
+            const points = path.getPoints(curvePoints);
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+            const mainGeometry = new THREE.TubeGeometry(path, curvePoints, params.lineThickness, 16, false);
+            
+            mainCurve = new THREE.Mesh(mainGeometry, mainMaterial);
+            mainScene.add(mainCurve);
+
+            for (const key in scenes) {
+                 projectionLines[key] = new THREE.Line(lineGeometry.clone(), projectionMaterial);
+                 scenes[key].add(projectionLines[key]);
+            }
+        }
+        
+        // --- UI Event Listeners ---
+        const knobs = {};
+        const switches = {};
+        const freqContainer = document.getElementById('frequency-knobs');
+        const ampContainer = document.getElementById('amplitude-knobs');
+
+        ['a', 'b', 'c'].forEach(key => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'knob-wrapper';
+            freqContainer.appendChild(wrapper);
+            switches[key] = new RotarySwitch(wrapper, key, { min: key === 'c' ? 0 : 1, max: 10, initial: params[key] });
+            switches[key].addEventListener('change', e => {
+                params[key] = e.detail.value;
+                updateCurve();
+                updateAudioParams();
+            });
+        });
+
+        ['A', 'B', 'C'].forEach(key => {
+             const wrapper = document.createElement('div');
+            wrapper.className = 'knob-wrapper';
+            ampContainer.appendChild(wrapper);
+            knobs[key] = new Knob(wrapper, key, {initial: params[key], min: 0.1, max: 2, precision: 1});
+             knobs[key].addEventListener('change', e => {
+                params[key] = e.detail.value;
+                updateCurve();
+                updateAudioParams();
+            });
+        });
+
+
+        knobs.deltaX = new Knob(document.getElementById('knob-deltaX-container'), 'δx', {initial: params.deltaX / Math.PI, min:0, max:2, isPhase: true});
+        knobs.deltaY = new Knob(document.getElementById('knob-deltaY-container'), 'δy', {initial: params.deltaY / Math.PI, min:0, max:2, isPhase: true});
+        knobs.deltaZ = new Knob(document.getElementById('knob-deltaZ-container'), 'δz', {initial: params.deltaZ / Math.PI, min:0, max:2, isPhase: true});
+
+        for (const knobKey of ['deltaX', 'deltaY', 'deltaZ']) {
+            knobs[knobKey].addEventListener('change', (e) => {
+                params[knobKey] = e.detail.value * Math.PI;
+                updateCurve();
+            });
+        }
+        
+        const colorPicker = new iro.ColorPicker("#color-picker-wrapper", {
+            width: 280,
+            color: { h: params.color.h, s: params.color.s * 100, l: params.color.l * 100 },
+            borderWidth: 1,
+            borderColor: "#fff",
+            layout: [
+                {
+                    component: iro.ui.Wheel,
+                },
+                {
+                    component: iro.ui.Slider,
+                    options: { sliderType: 'value' }
+                }
+            ]
+        });
+
+        colorPicker.on('color:change', function(color) {
+            const { h, s, l } = color.hsl;
+            params.color = { h, s: s/100, l: l/100 };
+            updateCurve();
+        });
+
+
+        ['damping', 'lineThickness', 'gridThickness', 'gridBrightness', 'glow'].forEach(key => {
+             document.getElementById(key).addEventListener('input', (event) => {
+                params[key] = parseFloat(event.target.value);
+                if (key === 'damping' || key === 'lineThickness') updateCurve();
+                if (key === 'gridThickness') updateGrid();
+                if (key === 'gridBrightness') gridMaterial.emissiveIntensity = params.gridBrightness;
+                if (key === 'glow') bloomPass.strength = Math.cbrt(params.glow); 
+            });
+        });
+
+        ['toggle-aa', 'toggle-phase', 'toggle-audio'].forEach(id => {
+            document.getElementById(id).addEventListener('change', (event) => {
+                const paramName = id === 'toggle-phase' ? 'isPhaseAnimating' 
+                                : id === 'toggle-audio' ? 'isAudioEnabled' 
+                                : 'aa';
+                params[paramName] = event.target.checked;
+                if (paramName === 'aa') smaaPass.enabled = params.aa;
+                if (paramName === 'isAudioEnabled') {
+                    if (params.isAudioEnabled) {
+                        initAudio();
+                        masterGain.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.05);
+                    } else {
+                        if(masterGain) masterGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.05);
+                    }
+                }
+            });
+        });
+
+        document.getElementById('collapse-btn').addEventListener('click', () => {
+            document.getElementById('controls').classList.add('collapsed');
+            document.getElementById('expand-btn').classList.remove('hidden');
+        });
+        document.getElementById('expand-btn').addEventListener('click', () => {
+            document.getElementById('controls').classList.remove('collapsed');
+            document.getElementById('expand-btn').classList.add('hidden');
+        });
+        document.getElementById('info-btn').addEventListener('click', () => {
+            document.getElementById('info-panel').classList.add('visible');
+        });
+        document.getElementById('info-close-btn').addEventListener('click', () => {
+            document.getElementById('info-panel').classList.remove('visible');
+        });
+
+        document.getElementById('toggle-rotate').addEventListener('click', () => { controls.autoRotate = !controls.autoRotate; });
+        
+        function setCameraPosition(pos, target = new THREE.Vector3(0,0,0)) {
+            gsap.to(mainCamera.position, { duration: 1, ease: "power2.inOut", ...pos });
+            gsap.to(controls.target, { duration: 1, ease: "power2.inOut", ...target });
+        }
+        document.getElementById('preset-persp').addEventListener('click', () => setCameraPosition({ x: 2, y: 3, z: 5 }));
+        document.getElementById('preset-top').addEventListener('click', () => setCameraPosition({ x: 0, y: 6, z: 0.01 }));
+        document.getElementById('preset-front').addEventListener('click', () => setCameraPosition({ x: 0, y: 0, z: 6 }));
+        document.getElementById('preset-side').addEventListener('click', () => setCameraPosition({ x: 6, y: 0, z: 0 }));
+        
+        window.addEventListener('resize', () => {
+            mainCamera.aspect = window.innerWidth / window.innerHeight;
+            mainCamera.updateProjectionMatrix();
+            mainRenderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            if (params.isPhaseAnimating) {
+                const time = clock.getElapsedTime();
+                const deltaXValue = ((time * 0.3) % 2);
+                const deltaYValue = ((time * 0.4) % 2);
+                const deltaZValue = ((time * 0.5) % 2);
+                
+                params.deltaX = deltaXValue * Math.PI;
+                params.deltaY = deltaYValue * Math.PI;
+                params.deltaZ = deltaZValue * Math.PI;
+                
+                knobs.deltaX.setValue(deltaXValue);
+                knobs.deltaY.setValue(deltaYValue);
+                knobs.deltaZ.setValue(deltaZValue);
+                updateCurve();
+            }
+            
+            composer.render();
+            for (const key in projectionRenderers) {
+                projectionRenderers[key].render(scenes[key], projectionCameras[key]);
+            }
+        }
+        
+        const gsapScript = document.createElement('script');
+        gsapScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js';
+        document.head.appendChild(gsapScript);
+        
+        gsapScript.onload = () => {
+             renderMathInElement(document.getElementById("equations"), {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ],
+                throwOnError : false
+            });
+            updateGrid();
+            updateCurve();
+            animate();
+        };
+
+        const equationsDiv = document.getElementById("equations");
+        equationsDiv.innerHTML = `
+            $$x(t) = A e^{-\\lambda t} \\sin(a t' + \\delta_x)$$
+            $$y(t) = B e^{-\\lambda t} \\sin(b t' + \\delta_y)$$
+            $$z(t) = C e^{-\\lambda t} \\sin(c t' + \\delta_z)$$
+        `;
+
+    </script>
+</body>
+</html>
