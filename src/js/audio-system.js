@@ -38,14 +38,17 @@ export class AudioSystem {
             console.warn('Audio initialization failed:', error);
             this.initialized = false;
         }
-    }
-
-    updateParams(params) {
-        if (!this.initialized || !this.audioContext) return;
+    }    updateParams(params) {
+        if (!this.initialized || !this.audioContext) {
+            console.warn('Audio system not initialized, skipping update');
+            return;
+        }
         
         try {
             const baseFreq = 110; // A2
             const now = this.audioContext.currentTime + 0.01; // Small delay to prevent clicking
+            
+            console.log('Updating audio params:', { a: params.a, b: params.b, c: params.c, A: params.A, B: params.B, C: params.C });
             
             this.oscillators.a.osc.frequency.linearRampToValueAtTime(baseFreq * params.a, now);
             this.oscillators.b.osc.frequency.linearRampToValueAtTime(baseFreq * params.b, now);

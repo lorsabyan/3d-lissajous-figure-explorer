@@ -494,13 +494,16 @@ class LissajousExplorer {
             }, 16); // 60fps
         }
         this.throttledGridThicknessUpdate();
-    }
-
-    async handleAudioToggle(enabled) {
+    }    async handleAudioToggle(enabled) {
         try {
             if (enabled) {
                 await this.audioSystem.init();
-                this.audioSystem.setVolume(0.15);
+                // Small delay to ensure audio context is ready
+                setTimeout(() => {
+                    this.audioSystem.setVolume(0.15);
+                    // Update audio parameters with current values immediately
+                    this.audioSystem.updateParams(this.params);
+                }, 100);
                 console.log('Audio enabled');
             } else {
                 this.audioSystem.setVolume(0);
