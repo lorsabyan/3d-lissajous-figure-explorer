@@ -27,7 +27,7 @@ body {
     border-radius: 12px;
     border: 1px solid #4b5563;
     width: 360px;
-    max-height: calc(100vh - 60px); /* Reduced from 40px to 60px for better bottom margin */
+    max-height: calc(100vh - 70px); /* Account for shadow: 20px top + 20px bottom + 30px for shadow */
     overflow-y: auto;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -38,7 +38,7 @@ body {
 #controls {
     left: 20px;
     z-index: 20;
-    padding-bottom: 60px; /* Increased padding to prevent bottom clipping */
+    padding-bottom: 40px; /* Increased padding to ensure last element has proper spacing */
 }
 
 #info-panel {
@@ -46,8 +46,8 @@ body {
     top: 80px; /* Keep info panel below the info button to avoid overlap */
     z-index: 19;
     transform: translateX(110%);
-    max-height: calc(100vh - 120px); /* Account for positioning below button */
-    padding-bottom: 60px; /* Match controls panel padding-bottom for consistency */
+    max-height: calc(100vh - 130px); /* 80px top + 20px bottom + 30px for shadow */
+    padding-bottom: 20px; /* Match controls panel padding-bottom for consistency */
 }
 
 #info-panel.visible {
@@ -554,11 +554,12 @@ input[type=range]::-moz-range-thumb {
         width: calc(100vw - 40px);
         max-width: 360px;
         font-size: 0.9rem;
+        max-height: calc(100vh - 70px); /* Account for shadow: 20px top + 20px bottom + 30px shadow */
     }
     
     #info-panel {
         top: 70px; /* Adjust for smaller mobile spacing */
-        max-height: calc(100vh - 110px);
+        max-height: calc(100vh - 120px); /* 70px top + 20px bottom + 30px shadow */
     }
     
     .projection-container {
@@ -587,11 +588,12 @@ input[type=range]::-moz-range-thumb {
     #controls, #info-panel {
         padding: 15px;
         width: calc(100vw - 30px);
+        max-height: calc(100vh - 70px); /* Account for shadow: 20px top + 20px bottom + 30px shadow */
     }
     
     #info-panel {
         top: 60px; /* Further adjust for very small screens */
-        max-height: calc(100vh - 90px);
+        max-height: calc(100vh - 110px); /* 60px top + 20px bottom + 30px shadow */
     }
     
     .projection-container {
@@ -607,4 +609,15 @@ input[type=range]::-moz-range-thumb {
         width: 100px;
         height: 100px;
     }
+}
+
+/* Ensure proper spacing for last element in controls panel */
+#toggle-rotate {
+    margin-bottom: 0 !important; /* Reset any existing margin */
+}
+
+/* Add spacing after the last element in controls */
+#controls > button:last-child,
+#controls > .btn-group:last-child {
+    margin-bottom: 1rem;
 }
