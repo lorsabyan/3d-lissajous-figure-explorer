@@ -14,6 +14,72 @@ Interactive WebGL-based visualization tool for exploring 3D Lissajous curves wit
 - Modern responsive UI with Tailwind CSS
 - WebGL-powered graphics with Three.js
 
+## About Lissajous Figures
+
+### Mathematical Foundation
+
+Lissajous figures (also known as Bowditch curves) are the graph of a system of parametric equations which describe complex harmonic motion. Named after French physicist Jules Antoine Lissajous, these curves represent the composition of two perpendicular harmonic motions.
+
+#### 2D Lissajous Curves
+
+In two dimensions, Lissajous curves are defined by:
+
+```text
+x(t) = A·sin(a·t + δ)
+y(t) = B·sin(b·t)
+```
+
+Where:
+
+- `A`, `B` are the amplitudes
+- `a`, `b` are the frequencies
+- `δ` is the phase difference
+- `t` is time
+
+#### 3D Extension
+
+This explorer extends the concept to three dimensions:
+
+```text
+x(t) = A·sin(a·t + δx)
+y(t) = B·sin(b·t + δy)
+z(t) = C·sin(c·t + δz)
+```
+
+### Key Parameters and Their Effects
+
+- **Frequency Ratios**: The ratio between frequencies determines the curve's periodicity and complexity
+  - Simple ratios (1:1, 2:1, 3:2) create closed, repeating patterns
+  - Irrational ratios produce quasi-periodic, never-repeating curves
+
+- **Phase Differences**: Control the orientation and shape of the curve
+  - δ = 0: Creates linear patterns
+  - δ = π/2: Produces circular/elliptical patterns
+  - Other values create various intermediate shapes
+
+- **Amplitudes**: Scale the curve along each axis, affecting the overall proportions
+
+### Scientific Applications
+
+Lissajous figures have practical applications in:
+
+1. **Electronics**: Oscilloscope displays for analyzing AC signals and phase relationships
+2. **Physics**: Studying harmonic oscillators and wave interference
+3. **Astronomy**: Modeling orbital mechanics and celestial body trajectories
+4. **Engineering**: Vibration analysis and mechanical system diagnostics
+5. **Acoustics**: Visualizing audio waveforms and frequency relationships
+6. **Art and Design**: Creating complex geometric patterns and animations
+
+### Interactive Features
+
+This explorer allows you to:
+
+- Adjust frequency ratios in real-time to see pattern evolution
+- Modify phase relationships to understand their geometric impact
+- Control amplitudes to scale the visualization
+- Synchronize with audio to explore the relationship between sound and motion
+- Export patterns for further analysis or artistic use
+
 ## Quick Start
 
 ### Prerequisites
