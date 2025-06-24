@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Lissajous Figure Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/3d-lissajous-figure-explorer/assets/index-Cff_qJ60.js"></script>
+  <link rel="modulepreload" crossorigin href="/3d-lissajous-figure-explorer/assets/three-CGPAIrlP.js">
+  <link rel="modulepreload" crossorigin href="/3d-lissajous-figure-explorer/assets/ui-6IQGdPFV.js">
+  <link rel="modulepreload" crossorigin href="/3d-lissajous-figure-explorer/assets/math-D0MXDLmA.js">
+  <link rel="stylesheet" crossorigin href="/3d-lissajous-figure-explorer/assets/math-CBw7QEdH.css">
+  <link rel="stylesheet" crossorigin href="/3d-lissajous-figure-explorer/assets/index-rjzkqMKv.css">
+</head>
+<body>    <button id="expand-btn" class="hidden">
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+    
+    <div id="controls">
+        <div class="panel-header">
+            <h1 class="text-xl font-bold">Lissajous Explorer</h1>
+            <div class="header-icons">
+                 <button id="info-btn" title="Information">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                 </button>
+                 <button id="collapse-btn" title="Collapse Panel">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+            </div>
+        </div>
+        
+        <h2 class="text-lg font-semibold mb-2 mt-4 text-center">Curve Parameters</h2>
+        <div class="control-group">
+            <label class="mb-2">Frequencies (a, b, c)</label>
+            <div id="frequency-knobs" class="knobs-container"></div>
+        </div>
+         <div class="control-group">
+            <label class="mb-2">Amplitudes (A, B, C)</label>
+            <div id="amplitude-knobs" class="knobs-container"></div>
+        </div>
+        <div class="control-group">
+             <label class="mb-2">Phase Shifts (δ)</label>
+             <div class="knobs-container">
+                <div id="knob-deltaX-container" class="knob-wrapper"></div>
+                <div id="knob-deltaY-container" class="knob-wrapper"></div>
+                <div id="knob-deltaZ-container" class="knob-wrapper"></div>
+             </div>
+        </div>
+        <div class="control-group">
+            <label for="damping">Damping (λ)</label>
+            <input id="damping" type="range" min="0" max="0.5" value="0.0" step="0.001">
+        </div>
+        
+        <div class="divider"></div>
+        <h2 class="text-lg font-semibold mb-2 text-center">Visuals</h2>
+        <div class="control-group">
+            <label>Color</label>
+            <div id="color-picker-wrapper">
+                <div id="color-picker"></div>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="lineThickness">Line Thickness</label>
+            <input id="lineThickness" type="range" min="0.01" max="0.05" value="0.015" step="0.001">
+        </div>
+         <div class="control-group">
+            <label for="gridThickness">Grid Thickness</label>
+            <input id="gridThickness" type="range" min="0.001" max="0.02" value="0.010" step="0.001">
+        </div>
+         <div class="control-group">
+            <label for="gridBrightness">Grid Brightness</label>
+            <input id="gridBrightness" type="range" min="0" max="2.5" value="1.7" step="0.01">
+        </div>
+        <div class="control-group">
+            <label for="glow">Glow Intensity</label>
+            <input id="glow" type="range" min="0" max="3" value="0.5" step="0.01">
+        </div>
+        <div class="toggle-switch-group">
+             <label for="toggle-aa">Anti-Aliasing</label>
+             <label class="toggle-switch">
+                <input type="checkbox" id="toggle-aa" class="toggle-input" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-switch-group">
+             <label for="toggle-phase">Animate Phase Shift</label>
+             <label class="toggle-switch">
+                <input type="checkbox" id="toggle-phase" class="toggle-input">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+         <div class="toggle-switch-group">
+             <label for="toggle-audio">Enable Audio</label>
+             <label class="toggle-switch">
+                <input type="checkbox" id="toggle-audio" class="toggle-input">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        
+        <div class="divider"></div>
+        <h2 class="text-lg font-semibold mb-2 text-center">Camera</h2>
+        <div class="btn-group">
+            <button class="btn" id="preset-persp">Perspective</button>
+            <button class="btn" id="preset-top">Top (XY)</button>
+            <button class="btn" id="preset-front">Front (XZ)</button>
+            <button class="btn" id="preset-side">Side (YZ)</button>
+        </div>
+        <button class="btn" id="toggle-rotate" style="width:100%; margin-top: 8px;">Toggle Auto-Rotate</button>
+    </div>    <div id="info-panel">
+        <div class="panel-header">
+            <h1 class="text-xl font-bold">Information</h1>
+            <div class="header-icons">
+                <button id="info-close-btn" title="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>        <p>This explorer simulates 3D Lissajous curves based on the following parametric equations for damped harmonic motion:</p>
+        <div id="equations"></div>
+        
+        <h3>Parameters</h3>
+        <div class="info-section">
+            <p><b>Frequencies (a, b, c):</b> The integer ratios between the oscillation frequencies on each axis. These determine the fundamental shape and number of "lobes" of the figure.</p>
+            <p><b>Amplitudes (A, B, C):</b> The maximum displacement of the curve along each respective axis.</p>
+            <p><b>Phase Shifts (δ):</b> The initial angle (in radians) of each oscillation. This effectively "rotates" the figure in 3D space by changing its starting point.</p>
+            <p><b>Damping (λ):</b> Controls the rate of exponential decay of the amplitude, causing the figure to spiral inwards over time. A value of 0 results in an undamped, stable figure.</p>
+        </div>
+    </div>
+
+    <canvas id="webgl"></canvas>
+    <div class="projection-container">
+        <div id="view-xy" class="projection-view">
+            <canvas id="canvas-xy"></canvas>
+            <div class="projection-label">XY</div>
+        </div>
+        <div id="view-xz" class="projection-view">
+            <canvas id="canvas-xz"></canvas>
+            <div class="projection-label">XZ</div>
+        </div>
+        <div id="view-yz" class="projection-view">
+             <canvas id="canvas-yz"></canvas>
+            <div class="projection-label">YZ</div>
+        </div>
+    </div>
+
+</body>
+</html>
