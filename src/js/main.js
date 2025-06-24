@@ -247,23 +247,11 @@ class LissajousExplorer {
             this.expandBtn = document.getElementById('expand-btn');
             this.controlsPanel = document.getElementById('controls');
             
-            console.log('DOM elements check:', {
-                collapseBtn: this.collapseBtn,
-                expandBtn: this.expandBtn,
-                controlsPanel: this.controlsPanel
-            });
-            
             // Validate elements exist
             if (!this.collapseBtn || !this.expandBtn || !this.controlsPanel) {
-                console.error('Sidebar toggle elements not found:', {
-                    collapseBtn: !!this.collapseBtn,
-                    expandBtn: !!this.expandBtn,
-                    controlsPanel: !!this.controlsPanel
-                });
+                console.error('Sidebar toggle elements not found');
                 return;
             }
-
-            console.log('Initializing sidebar toggle functionality...');
 
             // Initialize sidebar state - start expanded
             this.sidebarCollapsed = false;
@@ -276,7 +264,6 @@ class LissajousExplorer {
             try {
                 this.collapseBtn.addEventListener('click', this.handleCollapseClick.bind(this));
                 this.expandBtn.addEventListener('click', this.handleExpandClick.bind(this));
-                console.log('Sidebar toggle initialized successfully');
                 
                 // Update state to ensure consistency
                 this.updateSidebarState();
@@ -284,19 +271,15 @@ class LissajousExplorer {
                 console.error('Failed to add event listeners:', error);
             }
         }, 100);
-    }
-
-    handleCollapseClick(event) {
+    }    handleCollapseClick(event) {
         event.preventDefault();
         event.stopPropagation();
-        console.log('Collapsing sidebar...');
         this.toggleSidebar(true);
     }
 
     handleExpandClick(event) {
         event.preventDefault();
         event.stopPropagation();
-        console.log('Expanding sidebar...');
         this.toggleSidebar(false);
     }
 
@@ -308,18 +291,12 @@ class LissajousExplorer {
             this.sidebarCollapsed = shouldCollapse;
         }
 
-        console.log('Sidebar state:', this.sidebarCollapsed ? 'collapsed' : 'expanded');
         this.updateSidebarState();
     }    updateSidebarState() {
         if (!this.controlsPanel || !this.expandBtn) {
-            console.error('Cannot update sidebar state - missing elements:', {
-                controlsPanel: !!this.controlsPanel,
-                expandBtn: !!this.expandBtn
-            });
+            console.error('Cannot update sidebar state - missing elements');
             return;
         }
-
-        console.log('Updating sidebar state to:', this.sidebarCollapsed ? 'collapsed' : 'expanded');
 
         if (this.sidebarCollapsed) {
             // Sidebar is collapsed - hide panel, show expand button
@@ -327,21 +304,13 @@ class LissajousExplorer {
             this.expandBtn.classList.add('show');
             this.expandBtn.classList.remove('hidden');
             this.expandBtn.setAttribute('aria-hidden', 'false');
-            console.log('Applied collapsed state: panel hidden, expand button visible');
         } else {
             // Sidebar is expanded - show panel, hide expand button
             this.controlsPanel.classList.remove('collapsed');
             this.expandBtn.classList.remove('show');
             this.expandBtn.classList.add('hidden');
             this.expandBtn.setAttribute('aria-hidden', 'true');
-            console.log('Applied expanded state: panel visible, expand button hidden');
         }
-        
-        // Debug: log current classes
-        console.log('Current classes:', {
-            controlsPanel: this.controlsPanel.className,
-            expandBtn: this.expandBtn.className
-        });
     }
 
     initializeInfoPanel() {
@@ -417,17 +386,13 @@ class LissajousExplorer {
           // Cleanup on page unload
         window.addEventListener('beforeunload', () => this.cleanup());
         window.addEventListener('pagehide', () => this.cleanup());
-    }
-
-    setupMathRendering() {
+    }    setupMathRendering() {
         try {
             const equationsDiv = document.getElementById("equations");
             if (!equationsDiv) {
                 console.warn('Equations div not found');
                 return;
             }
-            
-            console.log('Setting up math rendering...');
             
             // Parse and render each equation manually
             const equations = [
@@ -449,7 +414,6 @@ class LissajousExplorer {
                         trust: true
                     });
                     equationsDiv.appendChild(div);
-                    console.log(`Equation ${index + 1} rendered successfully`);
                 } catch (eqError) {
                     console.warn(`Failed to render equation ${index + 1}:`, eqError);
                     // Fallback: show the raw LaTeX
@@ -459,8 +423,6 @@ class LissajousExplorer {
                     equationsDiv.appendChild(div);
                 }
             });
-            
-            console.log('Math rendering completed');
         } catch (error) {
             console.error('Math rendering setup failed:', error);
             // Ultimate fallback
@@ -504,10 +466,8 @@ class LissajousExplorer {
                     // Update audio parameters with current values immediately
                     this.audioSystem.updateParams(this.params);
                 }, 100);
-                console.log('Audio enabled');
             } else {
                 this.audioSystem.setVolume(0);
-                console.log('Audio disabled');
             }
         } catch (error) {
             console.warn('Audio toggle failed:', error);

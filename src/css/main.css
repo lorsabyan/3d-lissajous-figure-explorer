@@ -423,10 +423,6 @@ input[type=range]::-moz-range-thumb {
     margin: 0.5rem 0;
 }
 
-.equation-fallback p {
-    margin: 0.5rem 0;
-}
-
 .katex-display {
     margin: 0.5em 0;
     text-align: center;
@@ -611,12 +607,11 @@ input[type=range]::-moz-range-thumb {
     }
 }
 
-/* Ensure proper spacing for last element in controls panel */
+/* Controls panel last element spacing */
 #toggle-rotate {
-    margin-bottom: 0 !important; /* Reset any existing margin */
+    margin-bottom: 0 !important;
 }
 
-/* Add spacing after the last element in controls */
 #controls > button:last-child,
 #controls > .btn-group:last-child {
     margin-bottom: 1rem;
