@@ -1,0 +1,41 @@
+{
+  "name": "3d-lissajous-figure-explorer",
+  "version": "1.0.0",
+  "description": "Interactive WebGL-based visualization tool for exploring 3D Lissajous curves",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "vite preview --port 3000",
+    "clean": "rimraf dist",
+    "lint": "echo \"Add your preferred linter here\"",
+    "format": "echo \"Add your preferred formatter here\""
+  },
+  "keywords": [
+    "lissajous",
+    "3d",
+    "webgl",
+    "three.js",
+    "visualization",
+    "mathematics",
+    "audio"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.10",
+    "@tailwindcss/typography": "^0.5.16",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.10",
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "@jaames/iro": "^5.5.2",
+    "gsap": "^3.12.2",
+    "katex": "^0.16.22",
+    "three": "^0.160.0"
+  }
+}

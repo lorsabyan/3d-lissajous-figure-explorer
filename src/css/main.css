@@ -1,0 +1,542 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles and layout */
+body {
+    font-family: 'Source Serif 4', serif;
+    margin: 0;
+    overflow: hidden;
+    background-color: #111827;
+    color: #f3f4f6;
+}
+
+#webgl {
+    position: fixed;
+    top: 0;
+    left: 0;
+    outline: none;
+}
+
+/* Panel styles */
+#controls, #info-panel {
+    position: fixed;
+    top: 20px;
+    background-color: #1f2937;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #4b5563;
+    width: 360px;
+    max-height: calc(100vh - 60px); /* Reduced from 40px to 60px for better bottom margin */
+    overflow-y: auto;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: transform 0.4s ease-in-out;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+#controls {
+    left: 20px;
+    z-index: 20;
+    padding-bottom: 60px; /* Increased padding to prevent bottom clipping */
+}
+
+#info-panel {
+    right: 20px;
+    top: 80px; /* Keep info panel below the info button */
+    z-index: 19;
+    transform: translateX(110%);
+    max-height: calc(100vh - 120px); /* Account for positioning below button */
+}
+
+#info-panel.visible {
+    transform: translateX(0);
+}
+
+#controls.collapsed {
+    transform: translateX(-110%);
+}
+
+/* Expand button visibility states */
+#expand-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: rgba(31, 41, 55, 0.85);
+    color: #9ca3af;
+    padding: 8px;
+    border-radius: 50%;
+    border: 1px solid #4b5563;
+    z-index: 25; /* Higher than controls panel */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s ease-in-out;
+}
+
+#expand-btn.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#expand-btn:hover {
+    background-color: rgba(31, 41, 55, 1);
+    color: #fff;
+    transform: translateX(4px) scale(1.05);
+}
+
+#expand-btn svg {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+/* Custom Scrollbar */
+#controls::-webkit-scrollbar, #info-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+#controls::-webkit-scrollbar-track, #info-panel::-webkit-scrollbar-track {
+    background: #1f2937;
+}
+
+#controls::-webkit-scrollbar-thumb, #info-panel::-webkit-scrollbar-thumb {
+    background-color: #4b5563;
+    border-radius: 4px;
+    border: 2px solid #1f2937;
+}
+
+/* Toggle buttons - shared styles */
+.toggle-btn {
+    position: fixed;
+    background-color: rgba(31, 41, 55, 0.95);
+    color: #9ca3af;
+    padding: 12px;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    border: none;
+    outline: none;
+}
+
+.toggle-btn:hover {
+    background-color: rgba(31, 41, 55, 1);
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.toggle-btn svg {
+    width: 20px;
+    height: 20px;    pointer-events: none;
+}
+
+#info-btn {
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+/* Active state for toggle buttons */
+.toggle-btn.active {
+    background-color: #4ade80 !important;
+    color: #1f2937 !important;
+    border-color: #4ade80 !important;
+}
+
+.toggle-btn.active:hover {
+    background-color: #22c55e !important;
+    transform: scale(1.05);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.header-icons button {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-icons button:hover {
+    color: #fff;
+    background-color: rgba(75, 85, 99, 0.3);
+}
+
+.header-icons button svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Control components */
+.control-group { 
+    margin-bottom: 1rem; 
+}
+
+.control-group label { 
+    display: block; 
+    margin-bottom: 0.5rem; 
+    font-weight: 500; 
+    text-align: center; 
+}
+
+.divider { 
+    height: 1px; 
+    background-color: #4b5563; 
+    margin: 1.5rem 0; 
+}
+
+.btn-group { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 8px; 
+    margin-top: 1rem;
+}
+
+.btn {
+    padding: 8px; 
+    border-radius: 6px; 
+    background-color: #374151; 
+    border: 1px solid #4b5563;
+    color: #f3f4f6; 
+    cursor: pointer; 
+    transition: background-color 0.2s; 
+    text-align: center;
+}
+
+.btn:hover { 
+    background-color: #4b5563; 
+}
+
+/* Knob controls */
+.knobs-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    text-align: center;
+}
+
+.knob-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.knob {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Toggle switch styles */
+.toggle-switch-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+
+.toggle-switch .toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #374151;
+    transition: .4s;
+    border-radius: 28px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.toggle-input:checked + .toggle-slider {
+    background-color: #22c55e;
+}
+
+.toggle-input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+}
+
+/* Custom Slider Styles */
+input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    width: 100%;
+    margin: 8px 0;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: #374151;
+    border-radius: 2px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+    margin-top: -8px;
+    box-shadow: 0 0 5px #4ade80;
+}
+
+input[type=range]::-moz-range-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: #374151;
+    border-radius: 2px;
+}
+
+input[type=range]::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #4ade80;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 5px #4ade80;
+}
+
+/* Color picker */
+#color-picker-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+/* Projection views */
+.projection-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.projection-view {
+    width: 180px;
+    height: 180px;
+    border: 1px solid #2e443c;
+    border-radius: 8px;
+    background-color: rgba(10, 20, 15, 0.7);
+    position: relative;
+    overflow: hidden;
+}
+
+.projection-view canvas { 
+    display: block; 
+    width: 100%; 
+    height: 100%; 
+}
+
+.projection-label {
+    position: absolute; 
+    top: 5px; 
+    left: 5px; 
+    color: #a3f2a3; 
+    font-family: 'Roboto Mono', monospace;
+    font-size: 14px; 
+    background: rgba(0,0,0,0.5); 
+    padding: 2px 5px; 
+    border-radius: 3px;
+}
+
+/* Math rendering */
+#equations {
+    background-color: rgba(55, 65, 81, 0.5);
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    border-left: 3px solid #4ade80;
+}
+
+.equation-item {
+    margin: 0.5rem 0;
+    text-align: center;
+}
+
+.equation-fallback {
+    font-family: 'Roboto Mono', monospace;
+    text-align: center;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.equation-fallback p {
+    margin: 0.5rem 0;
+}
+
+.katex-display {
+    margin: 0.5em 0;
+    text-align: center;
+}
+
+.katex {
+    font-size: 1.1em !important;
+    color: #f3f4f6 !important;
+}
+
+.katex .base {
+    color: #f3f4f6 !important;
+}
+
+/* Info panel content */
+#info-panel p {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+#info-panel h3 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-top: 1rem;
+    border-bottom: 1px solid #4b5563;
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Utility classes */
+.hidden {
+    display: none !important;
+}
+
+.text-xl {
+    font-size: 1.25rem;
+}
+
+.text-lg {
+    font-size: 1.125rem;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    #controls, #info-panel {
+        width: calc(100vw - 40px);
+        max-width: 360px;
+        font-size: 0.9rem;
+    }
+    
+    .projection-container {
+        bottom: 10px;
+        right: 10px;
+        gap: 5px;
+    }
+    
+    .projection-view {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .knobs-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .knob svg {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    #controls, #info-panel {
+        padding: 15px;
+        width: calc(100vw - 30px);
+    }
+    
+    .projection-container {
+        position: relative;
+        bottom: auto;
+        right: auto;
+        margin: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .projection-view {
+        width: 100px;
+        height: 100px;
+    }
+}
