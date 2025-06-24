@@ -103,23 +103,24 @@
             <button class="btn" id="preset-side">Side (YZ)</button>
         </div>
         <button class="btn" id="toggle-rotate" style="width:100%; margin-top: 8px;">Toggle Auto-Rotate</button>
-    </div>
-
-    <div id="info-panel">
+    </div>    <div id="info-panel">
         <div class="panel-header">
             <h1 class="text-xl font-bold">Information</h1>
-            <button id="info-close-btn" title="Close">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-        </div>
-        <p>This explorer simulates 3D Lissajous curves based on the following parametric equations for damped harmonic motion:</p>
+            <div class="header-icons">
+                <button id="info-close-btn" title="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>        <p>This explorer simulates 3D Lissajous curves based on the following parametric equations for damped harmonic motion:</p>
         <div id="equations"></div>
         
         <h3>Parameters</h3>
-        <p><b>Frequencies (a, b, c):</b> The integer ratios between the oscillation frequencies on each axis. These determine the fundamental shape and number of "lobes" of the figure.</p>
-        <p><b>Amplitudes (A, B, C):</b> The maximum displacement of the curve along each respective axis.</p>
-        <p><b>Phase Shifts (δ):</b> The initial angle (in radians) of each oscillation. This effectively "rotates" the figure in 3D space by changing its starting point.</p>
-        <p><b>Damping (λ):</b> Controls the rate of exponential decay of the amplitude, causing the figure to spiral inwards over time. A value of 0 results in an undamped, stable figure.</p>
+        <div class="info-section">
+            <p><b>Frequencies (a, b, c):</b> The integer ratios between the oscillation frequencies on each axis. These determine the fundamental shape and number of "lobes" of the figure.</p>
+            <p><b>Amplitudes (A, B, C):</b> The maximum displacement of the curve along each respective axis.</p>
+            <p><b>Phase Shifts (δ):</b> The initial angle (in radians) of each oscillation. This effectively "rotates" the figure in 3D space by changing its starting point.</p>
+            <p><b>Damping (λ):</b> Controls the rate of exponential decay of the amplitude, causing the figure to spiral inwards over time. A value of 0 results in an undamped, stable figure.</p>
+        </div>
     </div>
 
     <canvas id="webgl"></canvas>

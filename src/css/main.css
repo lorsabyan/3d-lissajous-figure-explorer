@@ -43,10 +43,11 @@ body {
 
 #info-panel {
     right: 20px;
-    top: 80px; /* Keep info panel below the info button */
+    top: 80px; /* Keep info panel below the info button to avoid overlap */
     z-index: 19;
     transform: translateX(110%);
     max-height: calc(100vh - 120px); /* Account for positioning below button */
+    padding-bottom: 60px; /* Match controls panel padding-bottom for consistency */
 }
 
 #info-panel.visible {
@@ -422,6 +423,10 @@ input[type=range]::-moz-range-thumb {
     margin: 0.5rem 0;
 }
 
+.equation-fallback p {
+    margin: 0.5rem 0;
+}
+
 .katex-display {
     margin: 0.5em 0;
     text-align: center;
@@ -438,17 +443,60 @@ input[type=range]::-moz-range-thumb {
 
 /* Info panel content */
 #info-panel p {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
     line-height: 1.5;
+    font-size: 0.95rem;
 }
 
 #info-panel h3 {
-    font-size: 1.25rem;
-    font-weight: bold;
-    margin-top: 1rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #f3f4f6;
     border-bottom: 1px solid #4b5563;
-    padding-bottom: 0.25rem;
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+/* Add consistent spacing for info panel sections */
+#info-panel > p:first-of-type {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+#equations {
+    margin-bottom: 1.5rem;
+}
+
+/* Style parameter descriptions */
+#info-panel p b {
+    color: #4ade80;
+    font-weight: 600;
+}
+
+#info-panel p {
+    padding: 0.25rem 0;
+}
+
+/* Add visual grouping for parameter sections */
+#info-panel h3 + p {
+    margin-top: 0.5rem;
+}
+
+.info-section {
+    background-color: rgba(55, 65, 81, 0.3);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 3px solid #4ade80;
+    margin-top: 0.5rem;
+}
+
+.info-section p {
+    margin-bottom: 0.75rem;
+}
+
+.info-section p:last-child {
+    margin-bottom: 0;
 }
 
 /* Utility classes */
@@ -508,6 +556,11 @@ input[type=range]::-moz-range-thumb {
         font-size: 0.9rem;
     }
     
+    #info-panel {
+        top: 70px; /* Adjust for smaller mobile spacing */
+        max-height: calc(100vh - 110px);
+    }
+    
     .projection-container {
         bottom: 10px;
         right: 10px;
@@ -534,6 +587,11 @@ input[type=range]::-moz-range-thumb {
     #controls, #info-panel {
         padding: 15px;
         width: calc(100vw - 30px);
+    }
+    
+    #info-panel {
+        top: 60px; /* Further adjust for very small screens */
+        max-height: calc(100vh - 90px);
     }
     
     .projection-container {
