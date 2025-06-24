@@ -267,13 +267,19 @@ class LissajousExplorer {
 
             // Initialize sidebar state - start expanded
             this.sidebarCollapsed = false;
-            this.updateSidebarState();
+            
+            // Ensure expand button starts hidden since sidebar is expanded
+            this.expandBtn.classList.add('hidden');
+            this.expandBtn.classList.remove('show');
 
             // Add event listeners with error handling
             try {
                 this.collapseBtn.addEventListener('click', this.handleCollapseClick.bind(this));
                 this.expandBtn.addEventListener('click', this.handleExpandClick.bind(this));
                 console.log('Sidebar toggle initialized successfully');
+                
+                // Update state to ensure consistency
+                this.updateSidebarState();
             } catch (error) {
                 console.error('Failed to add event listeners:', error);
             }
@@ -319,12 +325,14 @@ class LissajousExplorer {
             // Sidebar is collapsed - hide panel, show expand button
             this.controlsPanel.classList.add('collapsed');
             this.expandBtn.classList.add('show');
+            this.expandBtn.classList.remove('hidden');
             this.expandBtn.setAttribute('aria-hidden', 'false');
             console.log('Applied collapsed state: panel hidden, expand button visible');
         } else {
             // Sidebar is expanded - show panel, hide expand button
             this.controlsPanel.classList.remove('collapsed');
             this.expandBtn.classList.remove('show');
+            this.expandBtn.classList.add('hidden');
             this.expandBtn.setAttribute('aria-hidden', 'true');
             console.log('Applied expanded state: panel visible, expand button hidden');
         }
