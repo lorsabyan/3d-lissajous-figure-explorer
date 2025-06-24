@@ -17,23 +17,27 @@ Interactive WebGL-based visualization tool for exploring 3D Lissajous curves wit
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - npm or yarn
 
 ### Local Development
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/lorsabyan/3d-lissajous-figure-explorer.git
    cd 3d-lissajous-figure-explorer
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Start the development server:
+
    ```bash
    npm run dev
    ```
@@ -92,7 +96,7 @@ This will build the project and push it to the `gh-pages` branch.
 
 ## Project Structure
 
-```
+```text
 ├── src/
 │   ├── css/           # Stylesheets
 │   └── js/            # JavaScript modules
